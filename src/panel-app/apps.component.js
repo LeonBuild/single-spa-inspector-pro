@@ -168,7 +168,7 @@ export default function Apps(props) {
               onMouseEnter={() => setHovered(app)}
               onMouseLeave={() => setHovered()}
             >
-              <div role="cell">{app.name}</div>
+              <div role="cell" className="app-name">{app.name}</div>
               <div role="cell">
                 <span
                   className={always("app-status")
@@ -333,30 +333,45 @@ const css = `
   --pink: #e62e5c;
   --green: #28cb51;
   --table-spacing: .5rem;
+  --text-primary: #1a1a1a;
+  --text-secondary: #82889a;
+  --bg-tab: #f0f0f0;
 }
 body {
   font-family: sans-serif;
+  color: var(--text-primary);
 }
 
 body.dark {
+  --text-primary: #F8F8F2;
+  --text-secondary: #a0a0a0;
+  --bg-tab: #3c3c3c;
   background-color: #272822;
-  color: #F8F8F2;
 }
 
-body.dark [role="cell"] {
-  color: #F8F8F2;
+/* Tab 样式 - 自动适配黑白主题 */
+[data-reach-tab-list] {
+  background: var(--bg-tab);
 }
 
-body.dark [data-reach-tab-list] {
-  background: #3c3c3c;
+[data-reach-tab] {
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
-body.dark [data-reach-tab] {
-  color: #F8F8F2;
+[data-reach-tab][data-selected] {
+  border-bottom-color: var(--blue);
 }
 
-body.dark [data-reach-tab][data-selected] {
-  border-bottom-color: #F8F8F2;
+/* App Name 样式 - 加粗加重 */
+& .app-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+}
+
+body.dark & .app-name {
+  color: #ffffff;
 }
 
 & .toolbar {
