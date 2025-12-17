@@ -143,6 +143,20 @@ function PanelRoot(props) {
     };
   }, []);
 
+  // Listen for panel shown event to refresh apps state
+  // This ensures we get the latest state after the panel was hidden for a while
+  useEffect(() => {
+    const handlePanelShown = () => {
+      console.debug("[single-spa-inspector-pro] Panel shown, refreshing apps state");
+      fetchApps();
+    };
+    
+    window.addEventListener("ext-panel-shown", handlePanelShown);
+    return () => {
+      window.removeEventListener("ext-panel-shown", handlePanelShown);
+    };
+  }, [fetchApps]);
+
   // 加载中或导航中状态
   if (!apps) {
     return (

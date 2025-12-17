@@ -29,6 +29,13 @@ async function createPanel() {
       });
       panelWindow.dispatchEvent(custEvent);
     });
+
+    // Notify panel app to refresh apps state when panel becomes visible
+    // This ensures we get the latest state after the panel was hidden
+    const refreshEvent = new CustomEvent("ext-panel-shown", {
+      detail: { timestamp: Date.now() },
+    });
+    panelWindow.dispatchEvent(refreshEvent);
   });
 
   panel.onHidden.addListener(() => {
