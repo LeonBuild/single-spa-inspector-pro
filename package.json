@@ -1,10 +1,12 @@
 {
-  "name": "single-spa-inspector",
-  "version": "0.5.0",
-  "description": "A devtools extension for single-spa applications",
+  "name": "single-spa-inspector-v3",
+  "version": "3.0.0",
+  "description": "A devtools extension for single-spa applications (Manifest V3)",
   "scripts": {
     "prebuild": "npm run webpack-build && npm run lint",
     "build": "web-ext build",
+    "build:firefox": "npm run webpack-build && web-ext build --overwrite-dest --filename single-spa-inspector-v3-firefox-{version}.zip",
+    "build:chrome": "npm run webpack-build && node scripts/build-chrome.js && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --overwrite-dest --filename single-spa-inspector-v3-chrome-{version}.zip",
     "lint": "web-ext lint",
     "start": "concurrently --kill-others-on-fail -s \"first\" --names \"EXT,WPK\" -c \"cyan,magenta\" \"npm:start:firefox\" \"webpack --watch\"",
     "start:firefox": "web-ext run --keep-profile-changes --firefox-profile=single-spa-inspector-dev",
@@ -25,7 +27,8 @@
     "microservice",
     "javascript",
     "extension",
-    "devtools"
+    "devtools",
+    "manifest-v3"
   ],
   "author": "Anthony Frehner",
   "license": "MIT",
@@ -43,7 +46,7 @@
     "prettier": "2.4.1",
     "pretty-quick": "^3.1.1",
     "style-loader": "^3.3.0",
-    "web-ext": "^6.4.0",
+    "web-ext": "^9.2.0",
     "webpack": "^5.56.1",
     "webpack-cli": "^4.8.0"
   },
@@ -53,7 +56,7 @@
     "kremling": "^2.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "webextension-polyfill": "^0.8.0"
+    "webextension-polyfill": "^0.12.0"
   },
   "browserslist": [
     "last 5 chrome version",

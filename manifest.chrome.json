@@ -36,12 +36,6 @@
     }
   ],
   "background": {
-    "scripts": ["./build/backgroundScript.js"]
-  },
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "single-spa-inspector-v3@single-spa.js.org",
-      "strict_min_version": "109.0"
-    }
+    "service_worker": "./build/backgroundScript.js"
   }
 }

@@ -72,8 +72,10 @@ function PanelRoot(props) {
 }
 
 async function getApps(setAppsFn) {
-  const results = await evalDevtoolsCmd(`exposedMethods.getRawAppData()`);
-  setAppsFn(results);
+  const results = await evalDevtoolsCmd(`exposedMethods?.getRawAppData()`);
+  if (results) {
+    setAppsFn(results);
+  }
 }
 
 function contentScriptListener(setApps, msg) {

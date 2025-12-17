@@ -16,8 +16,17 @@ export default function Profiler() {
   });
 
   useEffect(() => {
-    evalDevtoolsCmd("exposedMethods.getProfilerData()")
+    // First check if getProfilerData exists before calling it
+    evalDevtoolsCmd("exposedMethods?.getProfilerData")
+      .then((getProfilerDataFn) => {
+        if (typeof getProfilerDataFn !== 'function') {
+          setHasProfiler(false);
+          return Promise.resolve([]);
+        }
+        return evalDevtoolsCmd("exposedMethods.getProfilerData()");
+      })
       .then((evts) => {
+        if (!evts || evts.length === 0) return;
         if (filters.search.trim().length > 0) {
           const fuse = new Fuse(evts, {
             keys: ["name"],

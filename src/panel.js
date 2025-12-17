@@ -9,13 +9,20 @@ async function createPanel() {
   let portToBackground;
 
   const panel = await browser.devtools.panels.create(
-    "single-spa Inspector",
+    "single-spa Inspector v3",
     "/logo-white-bgblue.png",
     "/build/panel.html"
   );
 
   panel.onShown.addListener((panelWindow) => {
     portToBackground = browser.runtime.connect({ name: "panel-devtools" });
+    
+    // Send init message with the inspected tabId
+    portToBackground.postMessage({
+      type: "init",
+      tabId: browser.devtools.inspectedWindow.tabId,
+    });
+    
     portToBackground.onMessage.addListener((msg) => {
       const custEvent = new CustomEvent("ext-content-script", {
         detail: msg,

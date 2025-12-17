@@ -1,3 +1,112 @@
+# single-spa Inspector v3
+
+> 🚀 **This is a fork of [single-spa-inspector](https://github.com/single-spa/single-spa-inspector) with Manifest V3 support and enhanced features.**
+
+---
+
+## ✨ What's New in v3
+
+### 🔧 Manifest V3 Support
+
+- **Full Manifest V3 compatibility** for both Chrome and Firefox
+- Chrome uses Service Worker for background scripts
+- Firefox uses background scripts with module type
+- Updated `webextension-polyfill` to v0.12.0 for better MV3 support
+
+### 🎛️ Import Override Toggle Feature
+
+**New UI for Import Map Overrides:**
+
+| Component | Description |
+|-----------|-------------|
+| **Toggle Switch** | Quickly enable/disable saved override URLs |
+| **Readonly Input** | Display saved override URL |
+| **Edit Button** | Enter edit mode to modify URL |
+| **Save & Refresh** | Save URL and refresh page (in edit mode) |
+| **Cancel** | Cancel editing (in edit mode) |
+
+**Workflow:**
+1. Click **Edit** → Input becomes editable
+2. Enter override URL → Click **Save & Refresh**
+3. URL is saved, page refreshes, toggle turns ON
+4. Use **Toggle** to quickly switch override on/off without re-entering URL
+
+**Storage:** Override URLs are persisted in `browser.storage.local`, surviving browser restarts.
+
+### 📦 Build Improvements
+
+- Separate build scripts for Chrome and Firefox
+- Updated `web-ext` to v9.x for MV3 validation
+- Improved build configuration
+
+---
+
+## ⚠️ Permissions Notice
+
+### Chrome: Local Network Access Permission
+
+When using **localhost override URLs** (e.g., `http://localhost:9200/app.js`), Chrome will prompt for **"Local Network Access"** permission. This is a security feature in Chrome's Manifest V3 - the extension needs explicit permission to access local network resources.
+
+**To grant permission:**
+1. Click the permission prompt when it appears
+2. Or go to `chrome://extensions/` → single-spa Inspector v3 → "Site access" settings
+
+This is normal and required for local development overrides to work.
+
+---
+
+## 📥 Installation
+
+### From Release (Recommended)
+
+Download the latest release:
+- **Chrome**: `single-spa-inspector-v3-chrome-3.0.0.zip`
+- **Firefox**: `single-spa-inspector-v3-firefox-3.0.0.zip`
+
+**Chrome Installation:**
+1. Open `chrome://extensions/`
+2. Enable "Developer mode"
+3. Drag and drop the zip file, or unzip and "Load unpacked"
+
+**Firefox Installation:**
+1. Open `about:addons`
+2. Click gear icon → "Install Add-on From File..."
+3. Select the zip file
+
+### Build from Source
+
+```bash
+# Install dependencies
+npm install
+
+# Build for Firefox
+export NODE_OPTIONS=--openssl-legacy-provider
+npm run build:firefox
+
+# Build for Chrome
+export NODE_OPTIONS=--openssl-legacy-provider
+npm run build:chrome
+```
+
+Output files will be in `web-ext-artifacts/` directory.
+
+---
+
+## 🔄 Changelog
+
+| Version | Changes |
+|---------|---------|
+| **v3.0.0** | Manifest V3 support; Import Override Toggle UI; Storage persistence |
+| v0.5.0 | Original version (Manifest V2) |
+
+---
+
+## 📖 Original Documentation
+
+Below is the original README content from the upstream project.
+
+---
+
 # single-spa Devtools Inspector
 
 A Firefox/Chrome devtools extension to provide utilities for helping with [single-spa](https://single-spa.js.org) applications.

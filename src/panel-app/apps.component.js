@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Scoped, always } from "kremling";
 import AppStatusOverride from "./app-status-override.component";
 import Button from "./button";
+import ToggleSwitch from "./toggle-switch";
 import { evalDevtoolsCmd } from "../inspected-window.helper.js";
 import useImportMapOverrides from "./useImportMapOverrides";
 import ToggleGroup from "./toggle-group";
@@ -22,6 +23,11 @@ export default function Apps(props) {
   const [hovered, setHovered] = useState();
   const [overlaysEnabled, setOverlaysEnabled] = useState(OFF);
 
+  // 编辑状态管理：记录哪些 app 正在编辑
+  const [editingApps, setEditingApps] = useState({});
+  // 编辑中的临时值
+  const [editValues, setEditValues] = useState({});
+
   useEffect(() => {
     if (overlaysEnabled === LIST && hovered) {
       overlayApp(hovered);
@@ -40,6 +46,53 @@ export default function Apps(props) {
       };
     }
   }, [overlaysEnabled, mountedApps, otherApps]);
+
+  // 开始编辑
+  const startEdit = (appName) => {
+    setEditingApps({ ...editingApps, [appName]: true });
+    setEditValues({
+      ...editValues,
+      [appName]: importMaps.savedOverrides[appName]?.url || ""
+    });
+  };
+
+  // 取消编辑
+  const cancelEdit = (appName) => {
+    setEditingApps({ ...editingApps, [appName]: false });
+    setEditValues({ ...editValues, [appName]: "" });
+  };
+
+  // 保存并刷新
+  const handleSaveAndRefresh = async (appName) => {
+    const url = editValues[appName];
+    if (url && url.trim()) {
+      await importMaps.saveOverride(appName, url.trim());
+      setEditingApps({ ...editingApps, [appName]: false });
+    }
+  };
+
+  // Toggle 切换
+  const handleToggle = async (appName, enabled) => {
+    await importMaps.toggleOverride(appName, enabled);
+  };
+
+  // 获取显示的 URL 值
+  const getDisplayUrl = (appName) => {
+    if (editingApps[appName]) {
+      return editValues[appName] || "";
+    }
+    return importMaps.savedOverrides[appName]?.url || "";
+  };
+
+  // 判断 toggle 是否启用
+  const isToggleEnabled = (appName) => {
+    return importMaps.savedOverrides[appName]?.enabled || false;
+  };
+
+  // 判断是否有保存的 URL
+  const hasSavedUrl = (appName) => {
+    return !!importMaps.savedOverrides[appName]?.url;
+  };
 
   return (
     <Scoped css={css}>
@@ -86,28 +139,46 @@ export default function Apps(props) {
                 <AppStatusOverride app={app} />
               </div>
               {importMaps.enabled && (
-                <div role="cell">
-                  <input
-                    className={always("import-override")}
-                    aria-label={`Input an import-map override url for ${app.name}`}
-                    value={importMaps.overrides[app.name] || ""}
-                    onChange={(e) => {
-                      importMaps.setOverride(app.name, e.target.value);
-                    }}
+                <div role="cell" className="import-override-cell">
+                  {/* Toggle 开关 */}
+                  <ToggleSwitch
+                    checked={isToggleEnabled(app.name)}
+                    onChange={(enabled) => handleToggle(app.name, enabled)}
+                    disabled={!hasSavedUrl(app.name)}
                   />
+                  
+                  {/* Input */}
+                  <input
+                    className={always("import-override").maybe("editing", editingApps[app.name])}
+                    value={getDisplayUrl(app.name)}
+                    readOnly={!editingApps[app.name]}
+                    onChange={(e) => {
+                      setEditValues({ ...editValues, [app.name]: e.target.value });
+                    }}
+                    placeholder="Enter override URL..."
+                  />
+                  
+                  {/* 按钮容器 - 固定宽度防止 UI 跳动 */}
+                  <div className="override-buttons">
+                    {editingApps[app.name] ? (
+                      <>
+                        <Button onClick={() => handleSaveAndRefresh(app.name)}>
+                          Save
+                        </Button>
+                        <Button onClick={() => cancelEdit(app.name)}>
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Button onClick={() => startEdit(app.name)}>
+                        Edit
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           ))}
-          {importMaps.enabled && (
-            <div role="row">
-              <div role="cell" className="summary-action">
-                <Button onClick={importMaps.commitOverrides}>
-                  Apply Overrides & Refresh
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </span>
     </Scoped>
@@ -237,6 +308,25 @@ body.dark {
   background-color: var(--pink);
 }
 
+& .import-override-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+& .override-buttons {
+  display: flex;
+  gap: 4px;
+  min-width: 120px;
+  flex-shrink: 0;
+  justify-content: flex-start;
+}
+
+& .override-buttons .button {
+  min-width: 50px;
+  text-align: center;
+}
+
 & .import-override {
   border: 1.5px solid lightgrey;
   border-radius: 3px;
@@ -244,10 +334,22 @@ body.dark {
   font-size: .75rem;
   padding: .2rem;
   transition: all .15s ease-in-out;
-  width: 100%;
+  flex: 1;
+  min-width: 200px;
+}
+
+& .import-override:read-only {
+  background-color: #f5f5f5;
+  cursor: default;
+}
+
+& .import-override.editing {
+  background-color: #fff;
+  border-color: var(--blue);
 }
 
 & .import-override:focus {
   border-color: var(--blue);
+  outline: none;
 }
 `;
