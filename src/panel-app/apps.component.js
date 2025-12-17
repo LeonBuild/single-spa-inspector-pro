@@ -343,6 +343,22 @@ body.dark {
   color: #F8F8F2;
 }
 
+body.dark [role="cell"] {
+  color: #F8F8F2;
+}
+
+body.dark [data-reach-tab-list] {
+  background: #3c3c3c;
+}
+
+body.dark [data-reach-tab] {
+  color: #F8F8F2;
+}
+
+body.dark [data-reach-tab][data-selected] {
+  border-bottom-color: #F8F8F2;
+}
+
 & .toolbar {
   display: flex;
   justify-content: flex-start;

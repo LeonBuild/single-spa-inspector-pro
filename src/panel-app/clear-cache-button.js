@@ -43,9 +43,9 @@ export default function ClearCacheButton() {
 
   const getButtonText = () => {
     if (isClearing) return "Clearing...";
-    if (status === "success") return "✓ Cleared!";
-    if (status === "error") return "✗ Failed";
-    return "🗑️ Clear Cache & Refresh";
+    if (status === "success") return "Cleared!";
+    if (status === "error") return "Failed";
+    return "Clear Cache & Refresh";
   };
 
   return (
