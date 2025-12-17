@@ -1,14 +1,14 @@
 {
   "manifest_version": 3,
-  "name": "single-spa Inspector v3",
-  "short_name": "sspa Inspect v3",
+  "name": "single-spa Inspector Pro",
+  "short_name": "sspa Inspector Pro",
   "version": "3.1.1",
   "author": "gzl333",
-  "homepage_url": "https://github.com/gzl333/single-spa-inspector-v3",
+  "homepage_url": "https://github.com/gzl333/single-spa-inspector-pro",
   "description": "A devtools panel for single-spa applications (Manifest V3)",
   "action": {
     "default_icon": "./logo-white-bgblue.png",
-    "default_title": "single-spa Inspector v3"
+    "default_title": "single-spa Inspector Pro"
   },
   "icons": {
     "16": "./logo-white-bgblue.png",
@@ -44,7 +44,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "single-spa-inspector-v3@single-spa.js.org",
+      "id": "single-spa-inspector-pro@single-spa.js.org",
       "strict_min_version": "109.0"
     }
   }

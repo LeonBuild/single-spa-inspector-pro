@@ -9,7 +9,7 @@ async function createPanel() {
   let portToBackground;
 
   const panel = await browser.devtools.panels.create(
-    "single-spa Inspector v3",
+    "single-spa Inspector Pro",
     "/logo-white-bgblue.png",
     "/build/panel.html"
   );

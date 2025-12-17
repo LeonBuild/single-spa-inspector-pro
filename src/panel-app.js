@@ -180,7 +180,7 @@ function PanelRoot(props) {
             marginTop: "12px",
           }}
         >
-          Reload Single-spa Inspector v3
+          Reload single-spa Inspector Pro
         </button>
       </div>
     );
@@ -211,7 +211,7 @@ function PanelRoot(props) {
                 gap: '4px',
               }}
             >
-              Reload Single-spa Inspector v3
+              Reload single-spa Inspector Pro
             </button>
             <span style={{ color: '#82889a', fontSize: '0.75rem', paddingRight: '8px' }}>
               v{browser.runtime.getManifest().version}
@@ -219,7 +219,7 @@ function PanelRoot(props) {
           </div>
         </div>
 
-        <TabPanels style={{ marginTop: "16px" }}>
+        <TabPanels>
           <TabPanel>
             <Apps apps={apps} theme={props.theme} />
           </TabPanel>

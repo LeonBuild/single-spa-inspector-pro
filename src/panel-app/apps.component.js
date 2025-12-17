@@ -348,7 +348,7 @@ body.dark {
   justify-content: flex-start;
   align-items: center;
   gap: 16px;
-  padding: var(--table-spacing);
+  padding: 4px var(--table-spacing);
   margin-bottom: 0;
 }
 

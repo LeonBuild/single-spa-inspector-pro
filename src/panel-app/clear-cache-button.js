@@ -73,10 +73,10 @@ const css = `
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
-  padding: 8px 16px;
+  padding: 8px 0;
   transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   white-space: nowrap;
-  min-width: 180px;
+  width: 200px;
   text-align: center;
 }
 

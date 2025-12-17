@@ -1,12 +1,12 @@
 {
-  "name": "single-spa-inspector-v3",
+  "name": "single-spa-inspector-pro",
   "version": "3.1.1",
   "description": "A devtools extension for single-spa applications (Manifest V3)",
   "scripts": {
     "prebuild": "npm run webpack-build && npm run lint",
     "build": "web-ext build",
-    "build:firefox": "npm run webpack-build && web-ext build --overwrite-dest --filename single-spa-inspector-v3-firefox-{version}.zip",
-    "build:chrome": "npm run webpack-build && node scripts/build-chrome.js && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --overwrite-dest --filename single-spa-inspector-v3-chrome-{version}.zip",
+    "build:firefox": "npm run webpack-build && web-ext build --overwrite-dest --filename single-spa-inspector-pro-firefox-{version}.zip",
+    "build:chrome": "npm run webpack-build && node scripts/build-chrome.js && web-ext build --source-dir dist-chrome --artifacts-dir web-ext-artifacts --overwrite-dest --filename single-spa-inspector-pro-chrome-{version}.zip",
     "lint": "web-ext lint",
     "start": "concurrently --kill-others-on-fail -s \"first\" --names \"EXT,WPK\" -c \"cyan,magenta\" \"npm:start:firefox\" \"webpack --watch\"",
     "start:firefox": "web-ext run --keep-profile-changes --firefox-profile=single-spa-inspector-dev",

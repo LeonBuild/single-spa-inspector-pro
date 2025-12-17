@@ -1,6 +1,6 @@
 # 🚀 Chrome/Firefox 扩展商店发布指南
 
-本文档详细说明如何将 single-spa Inspector v3 扩展发布到 Chrome Web Store 和 Firefox Add-ons 商店。
+本文档详细说明如何将 single-spa Inspector Pro 扩展发布到 Chrome Web Store 和 Firefox Add-ons 商店。
 
 ---
 
@@ -121,7 +121,7 @@ export NODE_OPTIONS=--openssl-legacy-provider
 npm run build:firefox
 ```
 
-输出文件: `web-ext-artifacts/single-spa-inspector-v3-firefox-{version}.zip`
+输出文件: `web-ext-artifacts/single-spa-inspector-pro-firefox-{version}.zip`
 
 ### 构建 Chrome 版本
 
@@ -129,7 +129,7 @@ npm run build:firefox
 npm run build:chrome
 ```
 
-输出文件: `web-ext-artifacts/single-spa-inspector-v3-chrome-{version}.zip`
+输出文件: `web-ext-artifacts/single-spa-inspector-pro-chrome-{version}.zip`
 
 ---
 
@@ -145,7 +145,7 @@ npm run build:chrome
 
 1. 点击 **"Submit a New Add-on"**
 2. 选择 **"On this site"**（发布到商店）
-3. 上传 `single-spa-inspector-v3-firefox-{version}.zip`
+3. 上传 `single-spa-inspector-pro-firefox-{version}.zip`
 
 ### 步骤 3: 填写扩展信息
 
@@ -207,7 +207,7 @@ npm run build:chrome
 ### 步骤 2: 创建新项目
 
 1. 点击 **"New Item"**
-2. 上传 `single-spa-inspector-v3-chrome-{version}.zip`
+2. 上传 `single-spa-inspector-pro-chrome-{version}.zip`
 
 ### 步骤 3: 填写商店列表
 

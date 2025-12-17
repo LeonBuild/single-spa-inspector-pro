@@ -1,4 +1,4 @@
-# single-spa Inspector v3
+# single-spa Inspector Pro
 
 > 🚀 **This is a fork of [single-spa-inspector](https://github.com/single-spa/single-spa-inspector) with Manifest V3 support and enhanced features.**
 
@@ -60,7 +60,7 @@ When using **localhost override URLs** (e.g., `http://localhost:9200/app.js`), C
 
 **To grant permission:**
 1. Click the permission prompt when it appears
-2. Or go to `chrome://extensions/` → single-spa Inspector v3 → "Site access" settings
+2. Or go to `chrome://extensions/` → single-spa Inspector Pro → "Site access" settings
 
 This is normal and required for local development overrides to work.
 
@@ -71,8 +71,8 @@ This is normal and required for local development overrides to work.
 ### From Release (Recommended)
 
 Download the latest release:
-- **Chrome**: `single-spa-inspector-v3-chrome-3.1.0.zip`
-- **Firefox**: `single-spa-inspector-v3-firefox-3.1.0.zip`
+- **Chrome**: `single-spa-inspector-pro-chrome-{version}.zip`
+- **Firefox**: `single-spa-inspector-pro-firefox-{version}.zip`
 
 **Chrome Installation:**
 1. Open `chrome://extensions/`
