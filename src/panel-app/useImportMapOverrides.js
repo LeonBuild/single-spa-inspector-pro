@@ -8,7 +8,12 @@ let globalOperationVersion = 0;
 // 使用 bypassCache 刷新页面，确保加载最新资源
 async function reloadWithBypassCache() {
   const tabId = browser.devtools.inspectedWindow.tabId;
-  await browser.tabs.reload(tabId, { bypassCache: true });
+  // 通过 background script 调用 tabs.reload（在 Firefox devtools panel 中直接调用 tabs API 会失败）
+  await browser.runtime.sendMessage({
+    type: "tabs-reload",
+    tabId,
+    bypassCache: true,
+  });
 }
 
 // 判断是否为可恢复的协议错误（不应导致面板崩溃）
@@ -24,8 +29,12 @@ async function waitForPageLoad(maxWaitMs = 30000) {
   return new Promise((resolve) => {
     const checkStatus = async () => {
       try {
-        const tab = await browser.tabs.get(tabId);
-        if (tab.status === "complete") {
+        // 通过 background script 获取 tab 状态（在 Firefox devtools panel 中直接调用 tabs API 会失败）
+        const response = await browser.runtime.sendMessage({
+          type: "tabs-get",
+          tabId,
+        });
+        if (response?.tab?.status === "complete") {
           resolve(true);
           return;
         }
@@ -643,16 +652,20 @@ export default function useImportMapOverrides() {
   }, []);
 
   // 监听页面加载完成（包括手动刷新）后再校验一次
+  // 注意：在 Firefox devtools panel 中无法直接访问 browser.tabs API，
+  // 需要通过 background script 转发 tab-updated 事件
   useEffect(() => {
     const tabId = browser.devtools.inspectedWindow.tabId;
-    const handler = (updatedTabId, changeInfo) => {
-      if (updatedTabId === tabId && changeInfo.status === "complete") {
+    const handler = (event) => {
+      const msg = event.detail;
+      if (msg?.type === "tab-updated" && msg.tabId === tabId) {
         ensureSavedOverridesApplied("tab-updated");
       }
     };
 
-    browser.tabs.onUpdated.addListener(handler);
-    return () => browser.tabs.onUpdated.removeListener(handler);
+    // 监听从 background script 通过 port 转发的事件
+    window.addEventListener("ext-content-script", handler);
+    return () => window.removeEventListener("ext-content-script", handler);
   }, [importMapsEnabled, savedOverrides]);
 
   // ========== 原有方法 ==========

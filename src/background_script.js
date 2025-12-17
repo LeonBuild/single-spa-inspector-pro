@@ -34,11 +34,45 @@ async function handleClearCache(msg) {
   }
 }
 
+// Handle tabs.reload request from devtools panel
+async function handleTabsReload(msg) {
+  const { tabId, bypassCache } = msg;
+  try {
+    await browser.tabs.reload(tabId, { bypassCache: !!bypassCache });
+    return { success: true };
+  } catch (error) {
+    console.error("Error reloading tab:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Handle tabs.get request from devtools panel
+async function handleTabsGet(msg) {
+  const { tabId } = msg;
+  try {
+    const tab = await browser.tabs.get(tabId);
+    return { success: true, tab };
+  } catch (error) {
+    console.error("Error getting tab:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Listen for messages from content scripts and devtools panel
 browser.runtime.onMessage.addListener((msg, sender) => {
   // Handle clear-cache request from devtools panel
   if (msg.type === "clear-cache") {
     return handleClearCache(msg);
+  }
+  
+  // Handle tabs.reload request from devtools panel
+  if (msg.type === "tabs-reload") {
+    return handleTabsReload(msg);
+  }
+  
+  // Handle tabs.get request from devtools panel
+  if (msg.type === "tabs-get") {
+    return handleTabsGet(msg);
   }
   
   // Forward message to the devtools panel for the same tab
@@ -76,6 +110,23 @@ browser.runtime.onConnect.addListener((port) => {
       }
     }
   });
+});
+
+// Listen for tab updates and notify the corresponding panel
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  const port = portsToPanel.get(tabId);
+  if (port && changeInfo.status === "complete") {
+    try {
+      port.postMessage({
+        type: "tab-updated",
+        tabId,
+        changeInfo,
+      });
+    } catch (e) {
+      // Port might be disconnected
+      portsToPanel.delete(tabId);
+    }
+  }
 });
 
 // Listen for toolbar button (action) click - Clear Cache & Refresh

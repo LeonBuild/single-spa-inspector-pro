@@ -91,7 +91,7 @@ export default class ErrorBoundary extends React.Component {
               display: isRecoverable ? "none" : "inline-block",
             }}
           >
-            🔄 Try Reload Inspector
+            Try Reload Inspector
           </button>
           
           <p>
