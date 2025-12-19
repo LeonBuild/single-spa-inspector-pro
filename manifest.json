@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "single-spa Inspector Pro",
   "short_name": "sspa Inspector Pro",
-  "version": "3.1.2",
+  "version": "3.2.0",
   "author": "gzl333",
   "homepage_url": "https://github.com/gzl333/single-spa-inspector-pro",
   "description": "A devtools panel for single-spa applications (Manifest V3)",

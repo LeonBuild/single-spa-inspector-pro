@@ -24,23 +24,28 @@
 | **Edit Button** | Enter edit mode to modify URL |
 | **Save & Refresh** | Save URL and refresh page (in edit mode) |
 | **Cancel** | Cancel editing (in edit mode) |
+| **Export Button** (v3.2.0) | Export all saved overrides to JSON file (alphabetically sorted) |
+| **Import Button** (v3.2.0) | Import overrides from JSON file with validation |
+| **Sort by** (v3.2.0) | Toggle between AppName (A-Z) and Status sorting |
 
 **Workflow:**
 1. Click **Edit** → Input becomes editable
 2. Enter override URL → Click **Save & Refresh**
 3. URL is saved, page refreshes, toggle turns ON
 4. Use **Toggle** to quickly switch override on/off without re-entering URL
+5. **Export** all saved overrides to `single-spa-override-urls.json`
+6. **Import** from JSON file to batch configure overrides (disabled by default)
 
 **Storage:** Override URLs are persisted in `browser.storage.local`, surviving browser restarts.
 
-### 🗑️ Clear Cache & Refresh (v3.1.0)
+### 🗑️ Clear Cache & Refresh (v3.1.0+)
 
 **One-click cache clearing for micro-frontend development:**
 
-- **Clear Cache Button** in the top-left corner of the Applications tab
+- **Clear Cache Button** with beautiful gradient colors and animations
 - Clears HTTP cache, Service Worker cache, and Cache Storage
 - Automatically refreshes the page after clearing
-- Visual feedback: "Clearing..." → "✓ Cleared!" or "✗ Failed"
+- Visual feedback with animations: "Clearing..." → "Cleared!" or "Failed"
 
 This feature is essential for micro-frontend development where you need to ensure fresh resources are loaded.
 
@@ -141,6 +146,7 @@ Output files will be in `web-ext-artifacts/` directory.
 
 | Version | Changes |
 |---------|---------|
+| **v3.2.0** | **Import/Export Override URLs**: Export saved overrides to JSON (alphabetically sorted), import from JSON file with validation; **Sort by AppName/Status**: New sort options in toolbar to organize applications list; **Enhanced Clear Button**: Beautiful gradient colors and smooth animations for all button states (default, hover, clearing, success, error) |
 | **v3.1.3** | Fixed "Extension context invalidated" errors during rapid subapp switching; Added graceful error handling for Service Worker lifecycle in MV3 |
 | **v3.1.2** | Auto-recovery & real-time status: auto-reconnect on port disconnect, page/panel visibility recovery, stale detection fallback, thorough localStorage cleanup for import-map-overrides; Restored Overlays feature: fixed overlay helpers not being invoked after MV3 refactor; now uses ResizeObserver and default single-spa container fallback |
 | **v3.1.0** | Clear Cache & Refresh feature; One-click cache clearing for micro-frontend development |

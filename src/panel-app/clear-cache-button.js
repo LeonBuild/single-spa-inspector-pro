@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useCss, always } from "kremling";
 import browser from "webextension-polyfill";
 
-export default function ClearCacheButton({ sharedState, setSharedState }) {
+const ClearCacheButton = React.forwardRef(({ sharedState, setSharedState }, ref) => {
   const styles = useCss(css);
   
   // 使用共享状态或本地状态
@@ -77,6 +77,7 @@ export default function ClearCacheButton({ sharedState, setSharedState }) {
 
   return (
     <button
+      ref={ref}
       {...styles}
       className={always("clear-cache-btn")
         .maybe("clearing", isClearing)
@@ -89,52 +90,114 @@ export default function ClearCacheButton({ sharedState, setSharedState }) {
       {getButtonText()}
     </button>
   );
-}
+});
+
+ClearCacheButton.displayName = 'ClearCacheButton';
+
+export default ClearCacheButton;
 
 const css = `
 & .clear-cache-btn {
-  background-color: #1e8e3e;
+  background: linear-gradient(135deg, #2d9a4c 0%, #1e8e3e 100%);
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   color: white;
   cursor: pointer;
   font-size: .9rem;
   font-weight: 600;
   padding: .5rem 1.5rem;
-  transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
   text-align: center;
   line-height: 1.4;
   user-select: none;
   box-sizing: border-box;
   min-width: 220px;
+  box-shadow: 0 2px 8px rgba(30, 142, 62, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+& .clear-cache-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+& .clear-cache-btn:hover:not(:disabled)::before {
+  left: 100%;
 }
 
 & .clear-cache-btn:hover:not(:disabled) {
-  background-color: #187a34;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #34a855 0%, #2d9a4c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(30, 142, 62, 0.3);
 }
 
 & .clear-cache-btn:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: none;
+  box-shadow: 0 2px 6px rgba(30, 142, 62, 0.25);
 }
 
 & .clear-cache-btn:disabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
+  transform: none;
 }
 
 & .clear-cache-btn.clearing {
-  background-color: #6c757d;
+  background: linear-gradient(135deg, #7c8a9d 0%, #5a6978 100%);
+  box-shadow: 0 2px 8px rgba(90, 105, 120, 0.2);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(90, 105, 120, 0.2);
+  }
+  50% {
+    box-shadow: 0 2px 12px rgba(90, 105, 120, 0.4);
+  }
 }
 
 & .clear-cache-btn.success {
-  background-color: #28cb51;
+  background: linear-gradient(135deg, #34d058 0%, #28a745 100%);
+  box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+  animation: successPulse 0.5s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 & .clear-cache-btn.error {
-  background-color: #e62e5c;
+  background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+  box-shadow: 0 2px 8px rgba(211, 47, 47, 0.3);
+  animation: shake 0.5s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
 }
 `;

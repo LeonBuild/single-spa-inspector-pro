@@ -53,6 +53,7 @@ const css = `
 & legend {
   color: var(--gray);
   font-size: .9rem;
+  font-weight: 500;
   padding: 0;
   margin: 0;
   line-height: 1.2;

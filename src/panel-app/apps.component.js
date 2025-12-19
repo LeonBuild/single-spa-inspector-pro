@@ -155,6 +155,12 @@ export default function Apps(props) {
         // Immediately reload the savedOverrides state to show in UI
         await importMaps.loadSavedOverrides();
         
+        // Apply imported overrides to the page
+        // Note: This will reload the page after applying overrides
+        setTimeout(() => {
+          importMaps.ensureSavedOverridesApplied("import", mergedOverrides);
+        }, 100);
+        
         // Show import result
         const successCount = Object.keys(newSavedOverrides).length;
         let message = `Successfully imported ${successCount} app(s)`;
@@ -263,7 +269,10 @@ export default function Apps(props) {
     <Scoped css={css}>
       <span>
         <div className="toolbar">
-          <ClearCacheButton sharedState={clearCacheState} setSharedState={setClearCacheState} />
+          <ClearCacheButton 
+            sharedState={clearCacheState} 
+            setSharedState={setClearCacheState}
+          />
         </div>
         
         <div className="toolbar toolbar-second">
@@ -467,7 +476,10 @@ export default function Apps(props) {
         </div>
         
         <div className="bottom-toolbar">
-          <ClearCacheButton />
+          <ClearCacheButton 
+            sharedState={clearCacheState} 
+            setSharedState={setClearCacheState}
+          />
         </div>
       </span>
     </Scoped>
@@ -610,9 +622,9 @@ body.dark & .app-name {
   margin-bottom: 0;
   padding-left: var(--table-spacing);
   white-space: nowrap;
-  overflow-x: auto;
+  overflow-x: visible;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   flex-wrap: nowrap;
 }
 
@@ -627,7 +639,7 @@ body.dark & .app-name {
 & .override-import-export {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   margin-left: 0;
   white-space: nowrap;
   flex-wrap: nowrap;
@@ -640,6 +652,8 @@ body.dark & .app-name {
   font-weight: 500;
   white-space: nowrap;
   margin-right: 0;
+  line-height: 1.2;
+  user-select: none;
 }
 
 & .export-btn,
@@ -652,6 +666,7 @@ body.dark & .app-name {
   line-height: 1.2;
   user-select: none;
   box-sizing: border-box;
+  margin-left: 0;
 }
 
 & .export-btn:hover:not(:disabled),
