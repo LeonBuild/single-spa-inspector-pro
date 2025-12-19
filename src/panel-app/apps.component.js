@@ -175,6 +175,8 @@ export default function Apps(props) {
                     .maybe("app-mounted", app.status === "MOUNTED")
                     .maybe("app-not-mounted", app.status === "NOT_MOUNTED")
                     .maybe("app-not-loaded", app.status === "NOT_LOADED")
+                    .maybe("app-not-bootstrapped", app.status === "NOT_BOOTSTRAPPED")
+                    .maybe("app-unloading", app.status === "UNLOADING")
                     .maybe("app-loading", app.status === "LOADING_SOURCE_CODE")
                     .maybe("app-bootstrapping", app.status === "BOOTSTRAPPING")
                     .maybe("app-mounting", app.status === "MOUNTING")
@@ -278,8 +280,10 @@ const STATUS_PRIORITY = {
   MOUNTED: 1,              // 已挂载
   MOUNTING: 2,             // 正在挂载
   UNMOUNTING: 2,           // 正在卸载
+  UNLOADING: 2,            // 正在卸载资源
   NOT_MOUNTED: 3,          // 未挂载（已加载过）
   LOADING_SOURCE_CODE: 4,  // 正在加载源代码
+  NOT_BOOTSTRAPPED: 4,     // 尚未启动（已加载但未执行 bootstrap）
   BOOTSTRAPPING: 4,        // 正在启动
   NOT_LOADED: 5,           // 未加载
   SKIP_BECAUSE_BROKEN: 6,  // 因错误跳过
@@ -443,6 +447,14 @@ body.dark & .app-name {
 
 & .app-not-loaded {
   background-color: #9e9e9e;
+}
+
+& .app-unloading {
+  background-color: #ff9800;
+}
+
+& .app-not-bootstrapped {
+  background-color: #b0b0b0;
 }
 
 & .app-loading {
