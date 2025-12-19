@@ -16,12 +16,7 @@ const OFF = "off",
   PAGE = "page";
 
 export default function Apps(props) {
-  const sortedApps = useMemo(() => sortApps(props.apps), [props.apps]);
   const importMaps = useImportMapOverrides();
-  const { mounted: mountedApps, other: otherApps } = useMemo(
-    () => groupApps(props.apps),
-    [props.apps]
-  );
   const [hovered, setHovered] = useState();
   const [overlaysEnabled, setOverlaysEnabled] = useState(OFF);
 
@@ -35,16 +30,44 @@ export default function Apps(props) {
   const fileInputRef = React.useRef(null);
   // 导入/导出消息提示
   const [importExportMessage, setImportExportMessage] = useState(null); // { type: 'success' | 'error', text: '...' }
+  // 排序方式：'status' 或 'appname'
+  const [sortBy, setSortBy] = useState('status');
+  // Clear Cache 按钮状态 - 共享给两个按钮
+  const [clearCacheState, setClearCacheState] = useState({ isClearing: false, status: null });
+
+  // 根据排序方式排序 apps
+  const sortedApps = useMemo(() => {
+    if (sortBy === 'appname') {
+      return sortAppsByName(props.apps);
+    } else {
+      return sortApps(props.apps);
+    }
+  }, [props.apps, sortBy]);
+
+  const { mounted: mountedApps, other: otherApps } = useMemo(
+    () => groupApps(props.apps),
+    [props.apps]
+  );
 
   // Export override URLs
   const handleExportOverrides = () => {
     try {
       // Export only appname and url from savedOverrides
-      const exportData = {};
+      const tempData = {};
       Object.entries(importMaps.savedOverrides).forEach(([appName, config]) => {
         if (config.url) {
-          exportData[appName] = config.url;
+          tempData[appName] = config.url;
         }
+      });
+
+      // Sort by appName alphabetically
+      const sortedKeys = Object.keys(tempData).sort((a, b) => 
+        a.toUpperCase().localeCompare(b.toUpperCase())
+      );
+      
+      const exportData = {};
+      sortedKeys.forEach(key => {
+        exportData[key] = tempData[key];
       });
 
       const dataStr = JSON.stringify(exportData, null, 2);
@@ -129,6 +152,9 @@ export default function Apps(props) {
         // Save to storage
         await browser.storage.local.set({ savedOverrides: mergedOverrides });
         
+        // Immediately reload the savedOverrides state to show in UI
+        await importMaps.loadSavedOverrides();
+        
         // Show import result
         const successCount = Object.keys(newSavedOverrides).length;
         let message = `Successfully imported ${successCount} app(s)`;
@@ -138,11 +164,7 @@ export default function Apps(props) {
         }
         
         setImportExportMessage({ type: 'success', text: message });
-        
-        // Reload page after 3 seconds
-        setTimeout(() => {
-          window.location.reload();
-        }, 3000);
+        setTimeout(() => setImportExportMessage(null), 5000);
       } catch (err) {
         console.error('Error importing overrides:', err);
         setImportExportMessage({ type: 'error', text: 'Import failed: ' + err.message });
@@ -241,7 +263,10 @@ export default function Apps(props) {
     <Scoped css={css}>
       <span>
         <div className="toolbar">
-          <ClearCacheButton />
+          <ClearCacheButton sharedState={clearCacheState} setSharedState={setClearCacheState} />
+        </div>
+        
+        <div className="toolbar toolbar-second">
           <ToggleGroup
             name="overlaysDisplayOption"
             value={overlaysEnabled}
@@ -251,6 +276,16 @@ export default function Apps(props) {
             <ToggleOption value={OFF}>Off</ToggleOption>
             <ToggleOption value={ON}>On</ToggleOption>
             <ToggleOption value={LIST}>List Hover</ToggleOption>
+          </ToggleGroup>
+          
+          <ToggleGroup
+            name="sortByOption"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+          >
+            <legend style={{ display: "inline" }}>Sort by</legend>
+            <ToggleOption value="appname">AppName</ToggleOption>
+            <ToggleOption value="status">Status</ToggleOption>
           </ToggleGroup>
           
           {importMaps.enabled && (
@@ -430,6 +465,10 @@ export default function Apps(props) {
             </div>
           ))}
         </div>
+        
+        <div className="bottom-toolbar">
+          <ClearCacheButton />
+        </div>
       </span>
     </Scoped>
   );
@@ -461,6 +500,12 @@ function sortApps(apps) {
     .sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()))
     // 再按状态优先级排序（稳定排序，相同优先级保持名称顺序）
     .sort((a, b) => getAppPriority(a) - getAppPriority(b));
+}
+
+function sortAppsByName(apps) {
+  return [...apps].sort((a, b) => 
+    a.name.toUpperCase().localeCompare(b.name.toUpperCase())
+  );
 }
 
 function groupApps(apps) {
@@ -558,14 +603,35 @@ body.dark & .app-name {
   align-items: center;
   gap: 16px;
   padding: 4px var(--table-spacing);
+  margin-bottom: 4px;
+}
+
+& .toolbar-second {
   margin-bottom: 0;
+  padding-left: var(--table-spacing);
+  white-space: nowrap;
+  overflow-x: auto;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+& .bottom-toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 4px var(--table-spacing);
+  margin-top: 0;
 }
 
 & .override-import-export {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-left: 24px;
+  gap: 4px;
+  margin-left: 0;
+  white-space: nowrap;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
 }
 
 & .override-label {
@@ -573,6 +639,7 @@ body.dark & .app-name {
   font-size: .9rem;
   font-weight: 500;
   white-space: nowrap;
+  margin-right: 0;
 }
 
 & .export-btn,
@@ -582,11 +649,15 @@ body.dark & .app-name {
   font-size: .75rem;
   padding: .3rem .6rem;
   white-space: nowrap;
+  line-height: 1.2;
+  user-select: none;
+  box-sizing: border-box;
 }
 
 & .export-btn:hover:not(:disabled),
 & .import-btn:hover {
   background-color: var(--blue-dark);
+  outline: none;
 }
 
 & .export-btn:disabled {
@@ -599,7 +670,7 @@ body.dark & .app-name {
   font-size: .75rem;
   font-weight: 500;
   white-space: nowrap;
-  margin-left: 4px;
+  margin-left: 8px;
 }
 
 & .override-message.success {

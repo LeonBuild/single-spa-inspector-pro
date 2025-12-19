@@ -757,6 +757,7 @@ export default function useImportMapOverrides() {
     clearSavedOverride,
     clearAllOverrides,
     commitOverrides: batchSetOverrides,
+    loadSavedOverrides,  // 暴露加载方法供外部使用
     // 新增：暴露状态和方法供外部使用
     isLoading,
     protocolError,

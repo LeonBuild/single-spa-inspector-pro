@@ -2,10 +2,31 @@ import React, { useState } from "react";
 import { useCss, always } from "kremling";
 import browser from "webextension-polyfill";
 
-export default function ClearCacheButton() {
-  const [isClearing, setIsClearing] = useState(false);
-  const [status, setStatus] = useState(null); // null, 'success', 'error'
+export default function ClearCacheButton({ sharedState, setSharedState }) {
   const styles = useCss(css);
+  
+  // 使用共享状态或本地状态
+  const [localIsClearing, setLocalIsClearing] = useState(false);
+  const [localStatus, setLocalStatus] = useState(null);
+  
+  const isClearing = sharedState ? sharedState.isClearing : localIsClearing;
+  const status = sharedState ? sharedState.status : localStatus;
+  
+  const setIsClearing = (value) => {
+    if (sharedState && setSharedState) {
+      setSharedState(prev => ({ ...prev, isClearing: value }));
+    } else {
+      setLocalIsClearing(value);
+    }
+  };
+  
+  const setStatus = (value) => {
+    if (sharedState && setSharedState) {
+      setSharedState(prev => ({ ...prev, status: value }));
+    } else {
+      setLocalStatus(value);
+    }
+  };
 
   const handleClearCache = async () => {
     if (isClearing) return;
@@ -72,22 +93,25 @@ export default function ClearCacheButton() {
 
 const css = `
 & .clear-cache-btn {
-  background-color: #28cb51;
+  background-color: #1e8e3e;
   border: none;
   border-radius: 4px;
   color: white;
   cursor: pointer;
-  font-size: 14px;
+  font-size: .9rem;
   font-weight: 600;
-  padding: 8px 0;
+  padding: .5rem 1.5rem;
   transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   white-space: nowrap;
-  width: 200px;
   text-align: center;
+  line-height: 1.4;
+  user-select: none;
+  box-sizing: border-box;
+  min-width: 220px;
 }
 
 & .clear-cache-btn:hover:not(:disabled) {
-  background-color: #22b047;
+  background-color: #187a34;
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }

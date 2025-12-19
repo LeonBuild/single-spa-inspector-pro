@@ -23,12 +23,17 @@ const css = `
   cursor: pointer;
   font-size: .75rem;
   margin-right: 2px;
-  padding: .25rem 0.5rem .125rem;
+  padding: .3rem 0.6rem;
   transition: background .15s ease-in-out;
+  user-select: none;
+  line-height: 1.2;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 & .toggle-option:focus-within {
-  outline: 2px solid var(--blue-light);
+  outline: none;
 }
 
 & .toggle-option:first-of-type {
@@ -42,7 +47,7 @@ const css = `
 }
 
 & .toggle-option.active {
-  background: var(--blue-dark);
+  background: var(--green);
 }
 
 & .toggle-option input {
