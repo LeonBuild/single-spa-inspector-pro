@@ -1,6 +1,6 @@
 {
   "name": "single-spa-inspector-pro",
-  "version": "3.2.0",
+  "version": "4.0.0",
   "description": "A devtools extension for single-spa applications (Manifest V3)",
   "scripts": {
     "prebuild": "npm run webpack-build && npm run lint",
@@ -30,7 +30,7 @@
     "devtools",
     "manifest-v3"
   ],
-  "author": "gzl333",
+  "author": "LeonBuild",
   "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.15.5",

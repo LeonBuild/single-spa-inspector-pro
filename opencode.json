@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "single-spa-inspector-pro": {
+      "type": "local",
+      "command": ["node", "mcp/bin.js", "serve"],
+      "enabled": true,
+      "environment": {
+        "SSPA_MCP_PORT": "19988"
+      }
+    }
+  }
+}

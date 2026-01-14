@@ -1,5 +1,6 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { chromium, type Browser, type Page } from 'playwright-core';
 import {
   getRelayPort,
@@ -221,11 +222,11 @@ const tools: Tool[] = [
   },
 ];
 
-server.setRequestHandler({ method: 'tools/list' } as any, async () => {
+server.setRequestHandler(ListToolsRequestSchema, async () => {
   return { tools };
 });
 
-server.setRequestHandler({ method: 'tools/call' } as any, async (request: { params: { name: string; arguments?: Record<string, unknown> } }) => {
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args = {} } = request.params;
 
   try {

@@ -3,8 +3,8 @@
 
 import browser from "webextension-polyfill";
 
-// AI Bridge module (MCP support)
-import "./ai_bridge/bridge.js";
+// AI Bridge module (MCP support) - temporarily disabled for debugging
+// import "./ai_bridge/bridge.js";
 
 // Store active connections to devtools panels
 // Map of tabId -> port

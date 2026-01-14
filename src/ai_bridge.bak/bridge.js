@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const RELAY_PORT = process.env.SSPA_MCP_PORT || '19988';
+  const RELAY_PORT = '19988';
   const RELAY_URL = `ws://localhost:${RELAY_PORT}/extension`;
 
   let ws = null;
@@ -314,14 +314,16 @@
 
   if (typeof browser !== 'undefined') {
     init();
-  }
 
-  window.__aiBridge = {
-    attachTab,
-    detachTab,
-    getActiveTab,
-    ensureActiveTabAttached,
-    clearCacheAndReload,
-    ensureConnection,
-  };
+    if (typeof window !== 'undefined') {
+      window.__aiBridge = {
+        attachTab,
+        detachTab,
+        getActiveTab,
+        ensureActiveTabAttached,
+        clearCacheAndReload,
+        ensureConnection,
+      };
+    }
+  }
 })();
