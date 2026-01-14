@@ -3,6 +3,9 @@
 
 import browser from "webextension-polyfill";
 
+// AI Bridge module (MCP support)
+import "./ai_bridge/bridge.js";
+
 // Store active connections to devtools panels
 // Map of tabId -> port
 // Note: In Service Worker, this state may be lost when worker is terminated

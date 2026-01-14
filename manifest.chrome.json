@@ -21,7 +21,8 @@
     "storage",
     "scripting",
     "browsingData",
-    "tabs"
+    "tabs",
+    "debugger"
   ],
   "host_permissions": [
     "<all_urls>"
