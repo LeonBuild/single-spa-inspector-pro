@@ -3,6 +3,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
+  devtool: "source-map",
+
   entry: {
     contentScript: "./src/content_script.js",
     contentScriptMain: "./src/content_script_main.js",

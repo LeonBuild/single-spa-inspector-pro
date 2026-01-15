@@ -1,5 +1,4 @@
 import { Hono } from 'hono';
-import { cors } from 'hono/cors';
 import { WebSocketServer, WebSocket } from 'ws';
 import http from 'http';
 import {
@@ -29,6 +28,7 @@ interface TargetInfo {
   title?: string;
   url?: string;
   type?: string;
+  tabId?: number;
 }
 
 interface AttachedTarget {
@@ -46,11 +46,11 @@ const pendingRequests = new Map<number, PendingRequest>();
 let nextExtensionRequestId = 1;
 
 const ALLOWED_EXTENSION_IDS = getAllowedExtensionIds();
-if (ALLOWED_EXTENSION_IDS.length === 0) {
-  error('No SSPA_EXTENSION_IDS configured. Extension connections will be rejected.');
+const ALLOW_ANY_EXTENSION = ALLOWED_EXTENSION_IDS.length === 0;
+if (ALLOW_ANY_EXTENSION) {
+  error('No SSPA_EXTENSION_IDS configured. Allowing any chrome-extension origin.');
 }
 
-app.use(cors());
 
 app.get('/', (c) => {
   return c.text('OK');
@@ -112,7 +112,168 @@ function validateExtensionOrigin(origin: string | null): boolean {
   const match = origin.match(/^chrome-extension:\/\/([^/]+)/);
   if (!match) return false;
   const id = match[1];
+  if (ALLOW_ANY_EXTENSION) {
+    log(`Allowing extension origin without allowlist: ${id}`);
+    return true;
+  }
   return ALLOWED_EXTENSION_IDS.includes(id);
+}
+
+function buildTargetInfo(target: AttachedTarget): TargetInfo {
+  const targetInfo = target.targetInfo ?? {};
+  return {
+    targetId: targetInfo.targetId ?? target.sessionId,
+    type: targetInfo.type ?? 'page',
+    title: targetInfo.title ?? '',
+    url: targetInfo.url ?? '',
+    tabId: target.tabId ?? targetInfo.tabId,
+  };
+}
+
+function sendCdpResponse(clientId: string, payload: { id: number; sessionId?: string; result?: unknown }): void {
+  sendToCDPClient(clientId, payload);
+}
+
+function sendCdpError(clientId: string, payload: { id: number; sessionId?: string; error: string }): void {
+  sendToCDPClient(clientId, { id: payload.id, sessionId: payload.sessionId, error: { message: payload.error } });
+}
+
+function sendAttachedToTargetEvents(clientId: string): void {
+  for (const target of attachedTargets.values()) {
+    const targetInfo = buildTargetInfo(target);
+    sendToCDPClient(clientId, {
+      method: 'Target.attachedToTarget',
+      params: {
+        sessionId: target.sessionId,
+        targetInfo: {
+          ...targetInfo,
+          attached: true,
+        },
+        waitingForDebugger: false,
+      },
+    });
+  }
+}
+
+function sendTargetCreatedEvents(clientId: string): void {
+  for (const target of attachedTargets.values()) {
+    const targetInfo = buildTargetInfo(target);
+    sendToCDPClient(clientId, {
+      method: 'Target.targetCreated',
+      params: {
+        targetInfo: {
+          ...targetInfo,
+          attached: true,
+        },
+      },
+    });
+  }
+}
+
+function handleServerCdpCommand(
+  clientId: string,
+  message: { id: number; method: string; params?: Record<string, unknown>; sessionId?: string }
+): boolean {
+  const { id, method, params, sessionId } = message;
+
+  switch (method) {
+    case 'Browser.getVersion': {
+      sendCdpResponse(clientId, {
+        id,
+        sessionId,
+        result: {
+          protocolVersion: '1.3',
+          product: `single-spa-inspector-pro/${VERSION}`,
+          revision: VERSION,
+          userAgent: 'single-spa-inspector-pro-cdp-relay',
+          jsVersion: 'V8',
+        },
+      });
+      return true;
+    }
+
+    case 'Browser.setDownloadBehavior': {
+      sendCdpResponse(clientId, { id, sessionId, result: {} });
+      return true;
+    }
+
+    case 'Target.setAutoAttach': {
+      if (!sessionId) {
+        sendAttachedToTargetEvents(clientId);
+      }
+      sendCdpResponse(clientId, { id, sessionId, result: {} });
+      return true;
+    }
+
+    case 'Target.setDiscoverTargets': {
+      if ((params as { discover?: boolean } | undefined)?.discover) {
+        sendTargetCreatedEvents(clientId);
+      }
+      sendCdpResponse(clientId, { id, sessionId, result: {} });
+      return true;
+    }
+
+    case 'Target.getTargets': {
+      const targetInfos = Array.from(attachedTargets.values()).map((target) => ({
+        ...buildTargetInfo(target),
+        attached: true,
+      }));
+      sendCdpResponse(clientId, { id, sessionId, result: { targetInfos } });
+      return true;
+    }
+
+    case 'Target.getTargetInfo': {
+      const requestedTargetId = (params as { targetId?: string } | undefined)?.targetId;
+      const targetById = requestedTargetId
+        ? Array.from(attachedTargets.values()).find((target) => {
+          const targetInfo = buildTargetInfo(target);
+          return targetInfo.targetId === requestedTargetId;
+        })
+        : undefined;
+      const targetBySession = sessionId ? attachedTargets.get(sessionId) : undefined;
+      const target = targetById ?? targetBySession ?? Array.from(attachedTargets.values())[0];
+
+      if (!target) {
+        sendCdpError(clientId, { id, sessionId, error: 'No targets attached' });
+        return true;
+      }
+
+      sendCdpResponse(clientId, {
+        id,
+        sessionId,
+        result: { targetInfo: buildTargetInfo(target) },
+      });
+      return true;
+    }
+
+    case 'Target.attachToTarget': {
+      const requestedTargetId = (params as { targetId?: string } | undefined)?.targetId;
+      if (!requestedTargetId) {
+        sendCdpError(clientId, { id, sessionId, error: 'Target.attachToTarget requires targetId' });
+        return true;
+      }
+
+      const target = Array.from(attachedTargets.values()).find((entry) => {
+        const targetInfo = buildTargetInfo(entry);
+        return targetInfo.targetId === requestedTargetId;
+      });
+
+      if (!target) {
+        sendCdpError(clientId, { id, sessionId, error: `Target ${requestedTargetId} not found` });
+        return true;
+      }
+
+      sendCdpResponse(clientId, {
+        id,
+        sessionId,
+        result: { sessionId: target.sessionId },
+      });
+      return true;
+    }
+
+    default:
+      return false;
+  }
 }
 
 function handleExtensionMessage(data: Buffer) {
@@ -136,6 +297,7 @@ function handleExtensionMessage(data: Buffer) {
         const targetInfo = (params as { targetInfo?: TargetInfo }).targetInfo;
         attachedTargets.set(sessionId, {
           sessionId,
+          tabId: targetInfo?.tabId,
           targetInfo,
         });
       }
@@ -198,6 +360,17 @@ function handleCDPMessage(data: Buffer, clientId: string) {
       return;
     }
 
+    const serverHandled = handleServerCdpCommand(clientId, {
+      id: message.id,
+      method: message.method,
+      params: message.params,
+      sessionId: message.sessionId,
+    });
+
+    if (serverHandled) {
+      return;
+    }
+
     const relayId = nextExtensionRequestId++;
     pendingRequests.set(relayId, {
       clientId,
@@ -224,14 +397,26 @@ export async function startRelayServer(): Promise<void> {
 
   const server = http.createServer(async (req, res) => {
     try {
-      const response = await app.fetch(req as unknown as Request, {} as never);
-      response?.text().then((text) => {
-        res.writeHead(response.status, Object.fromEntries(response.headers));
-        res.end(text);
-      }).catch(() => {
-        res.writeHead(500);
-        res.end('Error');
-      });
+      const url = new URL(req.url ?? '/', `http://localhost:${port}`);
+      const init: RequestInit & { duplex?: 'half' } = {
+        method: req.method,
+        headers: req.headers as HeadersInit,
+      };
+
+      if (req.method && req.method !== 'GET' && req.method !== 'HEAD') {
+        const chunks: Buffer[] = [];
+        for await (const chunk of req) {
+          chunks.push(Buffer.from(chunk));
+        }
+        init.body = Buffer.concat(chunks);
+        init.duplex = 'half';
+      }
+
+      const request = new Request(url, init);
+      const response = await app.fetch(request);
+      const body = await response.text();
+      res.writeHead(response.status, Object.fromEntries(response.headers));
+      res.end(body);
     } catch {
       res.writeHead(500);
       res.end('Error');
@@ -254,7 +439,7 @@ export async function startRelayServer(): Promise<void> {
 
     if (pathname === '/extension') {
       if (!validateExtensionOrigin(origin)) {
-        error(`Rejected extension connection with invalid origin: ${origin}`);
+        error(`Rejected extension connection with invalid origin: ${origin}. Allowed: ${ALLOWED_EXTENSION_IDS.join(', ') || 'none'}`);
         ws.close(1008, 'Invalid origin');
         return;
       }

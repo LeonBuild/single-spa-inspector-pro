@@ -3,11 +3,15 @@
   "mcp": {
     "single-spa-inspector-pro": {
       "type": "local",
-      "command": ["node", "mcp/bin.js", "serve"],
-      "enabled": true,
-      "environment": {
-        "SSPA_MCP_PORT": "19988"
-      }
+      "command": [
+        "pnpm",
+        "--dir",
+        "D:\\dev-side\\single-spa-inspector-pro\\mcp",
+        "exec",
+        "tsx",
+        "src/mcp.ts"
+      ],
+      "enabled": true
     }
   }
 }

@@ -182,6 +182,14 @@ import browser from "webextension-polyfill";
       ]);
 
       const sessionId = `tab-${tabId}-${Date.now()}`;
+      const tab = await browser.tabs.get(tabId);
+      const targetInfo = {
+        targetId: sessionId,
+        type: 'page',
+        tabId,
+        title: tab?.title || '',
+        url: tab?.url || '',
+      };
 
       attachedTabs.set(tabId, {
         sessionId,
@@ -212,11 +220,7 @@ import browser from "webextension-polyfill";
             sessionId,
             params: {
               sessionId,
-              targetInfo: {
-                targetId: sessionId,
-                type: 'page',
-                tabId,
-              },
+              targetInfo,
             },
           },
         });
